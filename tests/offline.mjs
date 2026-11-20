@@ -8,6 +8,7 @@ const flags = ["--enable-features=OptimizationGuideOnDeviceModel,PromptAPIForGem
 const context = await chromium.launchPersistentContext(process.env.DIARY_CHROME_PROFILE || "", {
   channel: "chrome",
   headless: false,
+  locale: "en-US",
   args: flags,
   ignoreDefaultArgs: ["--disable-component-update", "--disable-background-networking", "--no-sandbox"],
 });
@@ -56,12 +57,12 @@ try {
     await page.locator(`[data-photo=${side}]`).setInputFiles({ name, mimeType: "image/png", buffer });
     await page.locator(`[data-preview=${side}]`).waitFor({ state: "visible" });
   }
-  await page.locator('[data-field="after.note"]').fill("Observación de prueba.");
+  await page.locator('[data-field="after.note"]').fill("Test observation.");
   await page.reload();
-  assert.equal(await page.locator('[data-field="after.note"]').inputValue(), "Observación de prueba.");
+  assert.equal(await page.locator('[data-field="after.note"]').inputValue(), "Test observation.");
   assert.equal(await page.locator("[data-preview]:visible").count(), 2);
 
-  console.log("Preparación de Chrome", await page.evaluate(async () => {
+  console.log("Chrome model readiness", await page.evaluate(async () => {
     const model = globalThis.LanguageModel;
     if (!model) return { api: false };
     const image = { type: "image" };
@@ -76,13 +77,13 @@ try {
   if (process.env.DIARY_PREPARE === "1") {
     await page.locator("#compare").click();
     await page.waitForFunction(() => !document.querySelector("#compare").disabled, { timeout: 185000 });
-    console.log("Preparación en línea", await page.locator("#status").innerText());
-    await page.locator('[data-field="after.note"]').fill("Prueba sin conexión.");
+    console.log("Online preparation", await page.locator("#status").innerText());
+    await page.locator('[data-field="after.note"]').fill("Offline comparison.");
   }
 
   await context.setOffline(true);
   await page.reload();
-  await page.waitForFunction(() => !navigator.onLine && document.querySelector("#connection").textContent === "Sin conexión");
+  await page.waitForFunction(() => !navigator.onLine && document.querySelector("#connection").textContent === "Offline");
   assert.equal(await page.locator("[data-preview]:visible").count(), 2);
   if (process.env.DIARY_SCREENSHOT) await page.screenshot({ path: process.env.DIARY_SCREENSHOT, fullPage: true });
   const network = [];
@@ -99,8 +100,8 @@ try {
     requests: network,
   }, null, 2));
   assert.ok(visible, outcome);
-  assert.match(await page.locator("#source").innerText(), /En este equipo/);
-  assert.match(await page.locator("#changes").innerText(), /flor|capullo/i);
+  assert.match(await page.locator("#source").innerText(), /On this device/);
+  assert.match(await page.locator("#changes").innerText(), /flower|bud/i);
   assert.ok(network.every(url => url.startsWith(origin) || url.startsWith("data:")));
 } finally {
   await context.close();

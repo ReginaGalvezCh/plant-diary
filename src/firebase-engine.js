@@ -4,9 +4,9 @@ import {
   getAI, getGenerativeModel, GoogleAIBackend, InferenceMode,
 } from "firebase/ai";
 
-export function createFirebaseEngine({ firebaseConfig, recaptchaEnterpriseSiteKey, appCheckDebug }, expectedInputs, expectedOutputs) {
+export function createFirebaseEngine({ firebaseConfig, recaptchaEnterpriseSiteKey, appCheckDebug }) {
   const app = initializeApp(firebaseConfig);
-  if (!recaptchaEnterpriseSiteKey) throw new Error("Falta configurar App Check.");
+  if (!recaptchaEnterpriseSiteKey) throw new Error("Missing App Check configuration.");
   if (appCheckDebug && ["localhost", "127.0.0.1"].includes(location.hostname)) {
     self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
   }
@@ -15,15 +15,17 @@ export function createFirebaseEngine({ firebaseConfig, recaptchaEnterpriseSiteKe
     isTokenAutoRefreshEnabled: true,
   });
   const ai = getAI(app, { backend: new GoogleAIBackend() });
-  const createModel = mode => getGenerativeModel(ai, {
-    mode,
-    onDeviceParams: { createOptions: { expectedInputs, expectedOutputs } },
-  });
-  const local = createModel(InferenceMode.ONLY_ON_DEVICE);
-  const cloud = createModel(InferenceMode.ONLY_IN_CLOUD);
+  const cloud = getGenerativeModel(ai, { mode: InferenceMode.ONLY_IN_CLOUD });
+  const localModels = new Map();
 
-  return async function compareWithFirebase(prompt, images, useCloud, signal, onDownloadProgress) {
-    const model = useCloud ? cloud : local;
+  return async function compareWithFirebase(prompt, images, useCloud, signal, onDownloadProgress, locale, createOptions) {
+    if (!useCloud && !localModels.has(locale)) {
+      localModels.set(locale, getGenerativeModel(ai, {
+        mode: InferenceMode.ONLY_ON_DEVICE,
+        onDeviceParams: { createOptions },
+      }));
+    }
+    const model = useCloud ? cloud : localModels.get(locale);
     const parts = [
       { text: prompt },
       ...images.flatMap(({ label, dataUrl }) => [
@@ -36,8 +38,8 @@ export function createFirebaseEngine({ firebaseConfig, recaptchaEnterpriseSiteKe
     const { response } = await model.generateContent(parts, { signal });
     const source = response.inferenceSource;
     if (source !== (useCloud ? "IN_CLOUD" : "ON_DEVICE")) {
-      throw new Error("Firebase no confirmó el origen de la comparación.");
+      throw new Error("unverifiedSource");
     }
-    return { text: response.text(), source: useCloud ? "Nube · Firebase AI Logic" : "En este equipo · Firebase AI Logic" };
+    return { text: response.text(), source: useCloud ? "sourceCloud" : "sourceLocal" };
   };
 }

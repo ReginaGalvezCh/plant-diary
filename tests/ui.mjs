@@ -4,18 +4,18 @@ import { chromium } from "playwright-core";
 const browser = await chromium.launch({ channel: "chrome" });
 try {
   for (const reducedMotion of ["no-preference", "reduce"]) {
-    const page = await browser.newPage({ viewport: { width: 390, height: 845 }, reducedMotion });
+    const page = await browser.newPage({ viewport: { width: 390, height: 845 }, reducedMotion, locale: "en-US" });
     const errors = [];
     page.on("pageerror", error => errors.push(error.message));
     await page.addInitScript(() => {
       // The UI check isolates presentation from model availability.
       globalThis.LanguageModel = {
         availability: async () => "available",
-        create: async () => ({
+        create: async ({ expectedOutputs }) => ({
           destroy() {},
-          prompt: async () => JSON.stringify({
-            changes: ["Hay una flor visible."], check: "Revisar el sustrato.", uncertainty: "La luz cambió.",
-          }),
+          prompt: async () => JSON.stringify(expectedOutputs[0].languages[0] === "es"
+            ? { changes: ["Hay una flor visible."], check: "Revisar el sustrato.", uncertainty: "La luz cambió." }
+            : { changes: ["One flower is visible."], check: "Check the potting mix.", uncertainty: "The lighting changed." }),
         }),
       };
     });
@@ -28,6 +28,7 @@ try {
       });
       await page.locator(`[data-zoom=${side}]`).waitFor({ state: "visible" });
     }
+    await page.locator('[data-field="after.note"]').fill("Orchid trial");
     await page.context().setOffline(true);
     await page.reload();
     await page.locator("#compare:not([disabled])").waitFor();
@@ -44,10 +45,20 @@ try {
     await dialog.waitFor({ state: "hidden" });
     await page.locator("#compare").click();
     await page.locator("#result").waitFor({ state: "visible" });
-    assert.equal(await page.locator("#uncertainty").innerText(), "La luz cambió.");
+    assert.equal(await page.locator("#uncertainty").innerText(), "The lighting changed.");
+    await page.getByLabel("Language").selectOption("es");
+    assert.equal(await page.locator("#title").innerText(), "Mis plantas de casa");
+    assert.equal(await page.locator("#uncertainty").getAttribute("lang"), "en");
+    assert.equal(await page.locator('[data-field="after.note"]').inputValue(), "Orchid trial");
+    await page.reload();
+    await page.locator("#compare:not([disabled])").waitFor();
+    assert.equal(await page.locator("#language").inputValue(), "es");
+    await page.locator("#compare").click();
+    await page.waitForFunction(() => document.querySelector("#uncertainty").textContent === "La luz cambió.");
+    assert.equal(await page.locator("#uncertainty").getAttribute("lang"), "es");
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth), 390);
     assert.deepEqual(errors, []);
-    console.log(`Mobile, offline, photo zoom, focus and result (${reducedMotion}): passed`);
+    console.log(`Mobile, offline, photo zoom, focus, result and language switching (${reducedMotion}): passed`);
     await page.context().close();
   }
 } finally {

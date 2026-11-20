@@ -78,3 +78,9 @@ fieldset { padding: .65rem clamp(.5rem, 2vw, 1rem) 1rem; border-radius: 1rem; }
 @media (max-width: 360px) {
   .pair { grid-template-columns: 1fr; }
 }
+
+.header-actions { display: flex; align-items: center; flex-wrap: wrap; justify-content: flex-end; gap: .35rem .6rem; }
+.language-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+#language { min-height: 2.75rem; border: 1px solid var(--border); border-radius: .45rem; background: var(--white); color: var(--ink); padding: .3rem .45rem; font: inherit; }
+#model-status { margin-top: .65rem; color: var(--green); overflow-wrap: anywhere; }
+#status:empty, #model-status:empty { display: none; }

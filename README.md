@@ -1,29 +1,43 @@
-# Diario de plantas
+# Plant Diary
 
-Prototipo web para seguir una planta de interior a partir de dos observaciones. La orquídea es el primer caso del piloto. El diario conserva las fotos, fechas y notas en el navegador. La comparación describe cambios visibles, propone una comprobación sencilla y explicita qué queda por confirmar. La humedad se comprueba en la maceta.
+Compare two photos of a houseplant, keep observations on the device, and decide what to check in person. The diary accepts any houseplant and stores one pair of observations at a time. The first field trial used an orchid.
 
-## Abrir en este equipo
+## Run locally
 
-Con Python 3 instalado, ejecuta `npm start` desde esta carpeta. Abre <http://127.0.0.1:8765/> en Chrome de escritorio. La primera apertura prepara la copia local de la aplicación. Gemini Nano necesita una descarga inicial si Chrome indica que el modelo es descargable.
+Use Node 26 (see `.nvmrc`) and Python 3.
 
-1. Carga dos imágenes de la misma planta en orden temporal. Se aceptan JPEG, PNG y WebP. Usa un encuadre y una iluminación similares.
-2. Escribe el nombre o especie si la conoces y añade fechas o notas si ayudan.
-3. Pulsa **Comparar en este equipo**. El resultado debe indicar el origen del procesamiento.
-4. Con el modelo instalado y la página ya abierta, simula el estado sin conexión desde Chrome o corta la conexión. Recarga, pulsa **Comparar en este equipo** y verifica que aparece una comparación nueva.
+```sh
+npm ci
+npm run build
+npm start
+```
 
-Sin configuración de Firebase, este primer prototipo usa directamente la API local de Chrome. La integración con Firebase se activa con la configuración de abajo. El botón de nube requiere confirmación antes de enviar las dos imágenes y sus notas.
+Open <http://127.0.0.1:8765/> in desktop Chrome. Add two photos of the same plant. Enter the dates, plant name, or notes if you have them. Select **Compare on this device**. Use the photo buttons to enlarge each image. The result records which engine ran the comparison.
 
-## Activar Firebase AI Logic
+The first visit saves the application shell, translations, and loaded animation bundle in Chrome. If the local model is not already installed, Chrome needs an internet connection for the initial download. Once the page and model are ready, switch the Chrome DevTools Network panel to **Offline**, reload normally, and run a fresh comparison. The language selector works with the network off. The diary keeps existing notes and images when the interface language changes.
 
-1. Usa Node 22 y ejecuta `npm ci` y `npm run build:firebase`.
-2. Registra una app web en un proyecto de Firebase con Firebase AI Logic, el backend Gemini Developer API y App Check. Configura el proveedor reCAPTCHA Enterprise.
-3. Copia `public/firebase-settings.js` a `public/firebase-settings.local.js`. Completa `firebaseConfig` y `recaptchaEnterpriseSiteKey`. Para localhost activa `appCheckDebug`, abre la app y registra el token de depuración que genera el navegador en la consola de Firebase. Mantén ese token privado. Para un sitio alojado utiliza un host autorizado y desactiva `appCheckDebug`.
-4. Abre el diario de nuevo con conexión para que el navegador guarde los módulos. Comprueba el funcionamiento local y el de nube en sesiones separadas. El resultado solo muestra el sello de Firebase si el SDK devuelve el origen esperado.
+English and Spanish ship as local message catalogs. The browser chooses a supported language on first load and remembers changes made with the selector. To add another language, add a catalog in `public/messages.js` and verify that Chrome's model supports it before enabling that language for model output. The original result remains in the language in which it was generated.
 
-[Guía oficial de Firebase para web](https://firebase.google.com/docs/ai-logic/hybrid/web/get-started)
+## Enable Firebase AI Logic
 
-## Ejecutar la prueba
+Without Firebase settings the prototype uses Chrome's local Prompt API directly. Configure the Firebase SDK for the hackathon submission and for the optional cloud comparison. Sending photos to the cloud requires confirmation in the app.
 
-Con el servidor iniciado y Chrome instalado, ejecuta `node tests/offline.mjs` con Node 22. La prueba usa dos ilustraciones controladas, verifica que el diario conserva los datos al recargar, activa el modo sin conexión de Chrome e intenta una comparación nueva. Falla si Chrome no puede producir el resultado. `DIARY_PREPARE=1` intenta primero la preparación conectada. `DIARY_CHROME_PROFILE` puede apuntar a un perfil aislado persistente para conservar la descarga entre pruebas. Evita usar un perfil de uso personal.
+1. Register a web app in a Firebase project. In the AI Logic guided setup, choose the Gemini Developer API backend and configure App Check with reCAPTCHA Enterprise.
+2. Copy `public/firebase-settings.js` to `public/firebase-settings.local.js` and fill in the web app configuration and reCAPTCHA Enterprise site key. For localhost, set `appCheckDebug` to `true` and register the browser-generated debug token in the Firebase console. Keep the debug token out of the repository and demo. Use an authorized host and disable debug mode for hosted deployment.
+3. Run `npm run build` and open the app once online to save the SDK bundle and settings in the local cache.
+4. Test both routes. A local comparison must show **On this device · Firebase AI Logic**. The SDK must confirm `ON_DEVICE` before the app shows that label.
 
-[Alcance y requisitos del hackathon](REQUISITOS.md)
+[Firebase web setup](https://firebase.google.com/docs/ai-logic/hybrid/web/get-started) · [App Check debug provider](https://firebase.google.com/docs/app-check/web/debug-provider)
+
+## Tests
+
+Build and start the app before running the browser checks:
+
+```sh
+node tests/ui.mjs
+node tests/offline.mjs
+```
+
+The UI check uses a controlled model response and verifies keyboard focus, photo enlargement, reduced motion, offline reload, and language switching. The offline check uses the real Chrome model with two controlled illustrations. Set `DIARY_PREPARE=1` to attempt the initial download online. A test-only profile with the model already installed may be supplied with `DIARY_CHROME_PROFILE`.
+
+[Entry requirements](REQUIREMENTS.md) · [Verification notes](VERIFICATION.md)

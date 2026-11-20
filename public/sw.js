@@ -1,5 +1,5 @@
-const cacheName = "diario-plantas-shell-v3";
-const shell = ["./", "./index.html", "./style.css", "./app.js", "./firebase-settings.js"];
+const cacheName = "diario-plantas-shell-v4";
+const shell = ["./", "./index.html", "./style.css", "./app.js", "./firebase-settings.js", "./messages.js"];
 
 self.addEventListener("install", event => {
   event.waitUntil(caches.open(cacheName).then(cache => cache.addAll(shell)).then(() => self.skipWaiting()));
