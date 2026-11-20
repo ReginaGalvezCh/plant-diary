@@ -15,6 +15,12 @@ const form = $("#diary");
 const compareButton = $("#compare");
 const cloudButton = $("#cloud");
 const status = $("#status");
+const photoDialog = $("#photo-dialog");
+const dialogImage = $("#dialog-image");
+let enlargedSide;
+let closingPhoto = false;
+let motion;
+void import("./motion.js").then(module => { motion = module; }).catch(() => {});
 let record = readRecord();
 let busy = false;
 let firebaseEngine;
@@ -54,6 +60,7 @@ function render() {
     const photo = record[side].photo;
     const image = $("[data-preview=" + side + "]");
     image.hidden = !photo;
+    $("[data-zoom=" + side + "]").hidden = !photo;
     if (photo) image.src = photo;
     else image.removeAttribute("src");
     $("[data-caption=" + side + "]").textContent = photo ? "Cambiar foto" :
@@ -67,7 +74,7 @@ function render() {
   updateControls();
 }
 
-function renderResult() {
+function renderResult({ animate = false } = {}) {
   const item = record.comparison;
   $("#result").hidden = !item;
   if (!item) return;
@@ -83,7 +90,41 @@ function renderResult() {
   $("#changes").replaceChildren(...changes);
   $("#check").textContent = item.check;
   $("#uncertainty").textContent = item.uncertainty;
+  if (animate) motion?.revealResult($("#result"));
 }
+
+for (const button of form.querySelectorAll("[data-zoom]")) {
+  button.addEventListener("click", () => {
+    const side = button.dataset.zoom;
+    const image = $("[data-preview=" + side + "]");
+    const state = motion?.capturePhoto(image);
+    enlargedSide = side;
+    $("#photo-dialog-title").textContent = side === "before" ? "Foto anterior" : "Foto reciente";
+    dialogImage.dataset.flipId = image.dataset.flipId;
+    dialogImage.src = record[side].photo;
+    dialogImage.alt = image.alt;
+    photoDialog.showModal();
+    motion?.transitionPhoto(state, dialogImage);
+  });
+}
+
+function closePhoto(event) {
+  event.preventDefault();
+  if (closingPhoto) return;
+  closingPhoto = true;
+  const close = () => photoDialog.close();
+  const thumbnail = $("[data-preview=" + enlargedSide + "]");
+  if (motion && thumbnail) motion.returnPhoto(dialogImage, thumbnail, close);
+  else close();
+}
+
+photoDialog.addEventListener("cancel", closePhoto);
+photoDialog.querySelector("form").addEventListener("submit", closePhoto);
+photoDialog.addEventListener("close", () => {
+  closingPhoto = false;
+  dialogImage.removeAttribute("src");
+  $("[data-zoom=" + enlargedSide + "]")?.focus();
+});
 
 async function normalizePhoto(file) {
   if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
@@ -243,7 +284,7 @@ async function compare(useCloud) {
     record.comparison = parseComparison(result);
     status.textContent = navigator.onLine ? "Comparación completada." : "Comparación completada sin conexión.";
     saveRecord();
-    renderResult();
+    renderResult({ animate: true });
   } catch (error) {
     status.textContent = error instanceof SyntaxError
       ? "La respuesta llegó en un formato inesperado. Vuelve a intentar la comparación."

@@ -20,11 +20,6 @@
         <h1 id="title">Mis plantas de casa</h1>
         <p>Compara dos fotos de la misma planta para ver qué cambió y qué conviene revisar.</p>
       </div>
-      <aside class="care">
-        <h2>Antes de regar</h2>
-        <p>Comprueba si el sustrato sigue húmedo y si queda agua en el cubremaceta. Ten en cuenta las necesidades de tu planta.</p>
-        <a href="https://secure.aos.org/media/Content-Images/PDFs/Orchid-Care-for-Beginners-Printable.pdf">Guía de cuidado de orquídeas</a>
-      </aside>
     </section>
     <form id="diary" aria-describedby="photo-tip">
       <label class="plant-name">Planta o especie
@@ -35,9 +30,12 @@
           <legend>Observación anterior</legend>
           <label class="photo">
             <input type="file" accept="image/jpeg,image/png,image/webp" data-photo="before" aria-label="Seleccionar foto anterior">
-            <img data-preview="before" alt="Foto de la observación anterior" hidden>
+            <img data-preview="before" data-flip-id="photo-before" alt="Foto de la observación anterior" hidden>
             <span data-caption="before">Añadir foto anterior</span>
           </label>
+          <div class="photo-actions">
+            <button type="button" class="secondary photo-zoom" data-zoom="before" hidden>Ampliar foto anterior</button>
+          </div>
           <div class="details">
             <label>Fecha <input type="date" data-field="before.date"></label>
             <label>Nota <input maxlength="200" data-field="before.note" placeholder="Ej. Regué esa mañana"></label>
@@ -47,9 +45,12 @@
           <legend>Observación reciente</legend>
           <label class="photo">
             <input type="file" accept="image/jpeg,image/png,image/webp" data-photo="after" aria-label="Seleccionar foto reciente">
-            <img data-preview="after" alt="Foto de la observación reciente" hidden>
+            <img data-preview="after" data-flip-id="photo-after" alt="Foto de la observación reciente" hidden>
             <span data-caption="after">Añadir foto reciente</span>
           </label>
+          <div class="photo-actions">
+            <button type="button" class="secondary photo-zoom" data-zoom="after" hidden>Ampliar foto reciente</button>
+          </div>
           <div class="details">
             <label>Fecha <input type="date" data-field="after.date"></label>
             <label>Nota <input maxlength="200" data-field="after.note" placeholder="Ej. Veo una mancha en una hoja"></label>
@@ -71,11 +72,18 @@
       </div>
       <div class="result-grid">
         <div><h3 id="changes-title">Cambios visibles</h3><ul id="changes"></ul></div>
-        <div><h3>Qué revisar</h3><p id="check"></p></div>
         <div><h3>Qué queda por confirmar</h3><p id="uncertainty"></p></div>
+        <div><h3>Qué revisar</h3><p id="check"></p></div>
       </div>
     </section>
     <footer>Las fotos y notas se guardan en este navegador.</footer>
+    <dialog id="photo-dialog" aria-labelledby="photo-dialog-title">
+      <div class="dialog-bar">
+        <h2 id="photo-dialog-title"></h2>
+        <form method="dialog"><button class="secondary" autofocus>Cerrar foto</button></form>
+      </div>
+      <img id="dialog-image" alt="">
+    </dialog>
   </main>
 </body>
 </html>

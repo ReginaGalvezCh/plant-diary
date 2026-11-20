@@ -5,8 +5,19 @@
   "type": "module",
   "scripts": {
     "build:firebase": "esbuild src/firebase-engine.js --bundle --format=esm --minify --legal-comments=linked --outfile=public/firebase-engine.js",
-    "start": "python3 -m http.server 8765 --bind 127.0.0.1 --directory public"
+    "start": "python3 -m http.server 8765 --bind 127.0.0.1 --directory public",
+    "build:motion": "esbuild src/motion.js --bundle --format=esm --minify --legal-comments=linked --outfile=public/motion.js",
+    "build": "npm run build:firebase && npm run build:motion"
   },
-  "dependencies": {"firebase": "13.4.0"},
-  "devDependencies": {"esbuild": "^0.27.0", "playwright-core": "^1.58.0"}
+  "dependencies": {
+    "firebase": "13.4.0",
+    "gsap": "3.15.1"
+  },
+  "devDependencies": {
+    "esbuild": "^0.27.0",
+    "playwright-core": "^1.58.0"
+  },
+  "engines": {
+    "node": ">=24.12.0"
+  }
 }

@@ -1,4 +1,4 @@
-const cacheName = "diario-plantas-shell-v2";
+const cacheName = "diario-plantas-shell-v3";
 const shell = ["./", "./index.html", "./style.css", "./app.js", "./firebase-settings.js"];
 
 self.addEventListener("install", event => {
@@ -14,7 +14,7 @@ self.addEventListener("fetch", event => {
   const url = new URL(event.request.url);
   if (event.request.method !== "GET" || url.origin !== self.location.origin ||
       !shell.some(path => new URL(path, self.location.href).pathname === url.pathname) &&
-      !["firebase-engine.js", "firebase-settings.local.js"].includes(url.pathname.split("/").pop())) return;
+      !["firebase-engine.js", "firebase-settings.local.js", "motion.js"].includes(url.pathname.split("/").pop())) return;
   event.respondWith(fetch(event.request).then(async response => {
     if (response.ok) {
       try {
