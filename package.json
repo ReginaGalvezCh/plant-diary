@@ -1,0 +1,12 @@
+{
+  "name": "diario-de-plantas",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build:firebase": "esbuild src/firebase-engine.js --bundle --format=esm --minify --legal-comments=linked --outfile=public/firebase-engine.js",
+    "start": "python3 -m http.server 8765 --bind 127.0.0.1 --directory public"
+  },
+  "dependencies": {"firebase": "13.4.0"},
+  "devDependencies": {"esbuild": "^0.27.0", "playwright-core": "^1.58.0"}
+}

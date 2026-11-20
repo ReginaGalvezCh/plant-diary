@@ -1,0 +1,61 @@
+:root {
+  color-scheme: light;
+  --ink: #242d25;
+  --muted: #4e5b4f;
+  --paper: #f6f5ef;
+  --white: #fffcf8;
+  --border: #cbcec2;
+  --green: #254933;
+  --orchid: #5a4059;
+  font: 1rem/1.5 system-ui, sans-serif;
+  color: var(--ink);
+  background: var(--paper);
+}
+*, *::before, *::after { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; }
+main { max-width: 69rem; margin: 0 auto; padding: 0 clamp(1rem, 4vw, 3rem); }
+header { display: flex; align-items: center; justify-content: space-between; gap: 1rem; min-height: 4.4rem; border-bottom: 1px solid var(--border); }
+.brand { color: var(--green); font-weight: 750; text-decoration: none; }
+#connection, #source { font-size: .875rem; font-weight: 650; color: var(--green); }
+.intro { display: grid; grid-template-columns: 1.7fr 1fr; align-items: end; gap: 2rem; margin: 2.5rem 0 1.9rem; }
+h1, h2, p { margin: 0; }
+h1, #result-title { font-family: Georgia, serif; font-weight: 400; letter-spacing: -.05em; }
+h1 { font-size: clamp(3rem, 7vw, 5.5rem); line-height: 1; margin-bottom: .65rem; }
+.intro p { max-width: 36rem; color: var(--muted); }
+.care { border-left: 3px solid #9b7398; padding: .4rem 0 .4rem 1rem; }
+.care h2 { color: var(--orchid); font-size: 1rem; }
+.care p, .care a { font-size: .875rem; }
+.care a { color: var(--orchid); text-underline-offset: .17em; }
+.plant-name { display: block; max-width: 24rem; margin-bottom: .85rem; color: var(--green); font-size: .875rem; font-weight: 700; }
+.pair { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+fieldset { min-width: 0; margin: 0; padding: .7rem .9rem .9rem; border: 1px solid var(--border); border-radius: .75rem; background: var(--white); }
+legend { padding: 0 .4rem; color: var(--green); font-weight: 700; }
+.photo { position: relative; isolation: isolate; min-height: 10rem; aspect-ratio: 2 / 1; overflow: hidden; display: grid; place-items: center; border: 1px dashed #788a77; border-radius: .5rem; background: #e9eee4; color: var(--green); cursor: pointer; }
+.photo input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; z-index: 2; }
+.photo img { position: absolute; width: 100%; height: 100%; object-fit: contain; background: #e7e9df; }
+.photo span { z-index: 1; padding: .4rem .65rem; background: #f8faf4; border-radius: .35rem; font-size: .875rem; font-weight: 650; }
+.photo:has(img:not([hidden])) span { align-self: end; margin: .5rem; }
+.photo:focus-within { outline: 3px solid #6e5480; outline-offset: 2px; }
+.details { display: grid; grid-template-columns: minmax(8.5rem, .8fr) minmax(0, 1.5fr); gap: .75rem; margin-top: .65rem; }
+.details label { font-weight: 650; font-size: .875rem; color: var(--muted); }
+.details input, .plant-name input { display: block; width: 100%; min-width: 0; min-height: 2.5rem; margin-top: .2rem; border: 1px solid var(--border); border-radius: .35rem; padding: .35rem .55rem; background: #fff; color: var(--ink); font: inherit; font-weight: 400; }
+.tip { margin: .65rem 0 1rem; font-size: .875rem; color: var(--muted); }
+.actions { display: flex; gap: .6rem; align-items: center; flex-wrap: wrap; }
+button { min-height: 2.8rem; padding: .55rem .9rem; border-radius: .42rem; border: 1px solid var(--green); color: white; background: var(--green); font: inherit; font-weight: 650; cursor: pointer; }
+button:disabled { opacity: .65; cursor: default; }
+.secondary, .link-button { background: transparent; color: var(--green); }
+.link-button { border-color: transparent; text-decoration: underline; text-underline-offset: .17em; }
+:focus-visible { outline: 3px solid #6e5480; outline-offset: 2px; }
+#status { margin: .55rem 0 1rem; color: var(--muted); overflow-wrap: anywhere; }
+.result { border-top: 1px solid var(--border); padding: 1.1rem 0; }
+.result-heading { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: .5rem; }
+#result-title { font-size: 2.3rem; }
+.result-grid { display: grid; grid-template-columns: 1.25fr 1fr 1fr; gap: 1rem; }
+.result h3 { font-size: 1rem; color: var(--orchid); margin: .6rem 0 .25rem; }
+.result ul { margin: 0; padding-left: 1.1rem; }
+footer { margin: 1.5rem 0; padding: .8rem 0; border-top: 1px solid var(--border); font-size: .875rem; color: var(--muted); }
+@media (max-width: 680px) {
+  .intro, .pair, .result-grid { grid-template-columns: 1fr; }
+  .intro { margin-top: 1.7rem; gap: 1rem; }
+}
